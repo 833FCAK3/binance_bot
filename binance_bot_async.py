@@ -1,7 +1,7 @@
 import requests as r
 import time
 from icecream import ic
-import logging  # For later use
+import logging
 import asyncio
 import aiohttp
 import json
@@ -88,6 +88,9 @@ async def a_get_prices(urls):
         prices = await asyncio.gather(*[a_get_price(url, session) for url in urls])
     return prices
 
+logging.basicConfig(encoding='utf-8',
+                    level=logging.DEBUG, filename='binance_bot.log', format='%(asctime)s %(levelname)s:%(message)s', datefmt='%F %H:%M:%S')
+
 
 def main():
     """Checks bot for updates and posts market data upon receiving /update    command."""
@@ -102,6 +105,7 @@ def main():
             {k: str(v).encode("utf-8") for k, v in update.items()}
             chat_id = get_chat_id(update)
             if chat_id:
+                logging.info('A message will be sent!')
                 msg_text = ""
                 if get_text(update) == "/update":
                     for price in asyncio.get_event_loop().run_until_complete(a_get_prices(url_currencies)):
