@@ -18,6 +18,10 @@ keyboard = json.dumps(
     {"keyboard": [[{"text": "/update"}]], "one_time_keyboard": True})
 
 
+logging.basicConfig(encoding='utf-8',
+                    level=logging.DEBUG, filename='binance_bot.log', format='%(asctime)s %(levelname)s:%(message)s', datefmt='%F %H:%M:%S')
+
+
 # Functions to interact with Telegram bot.
 def get_all_updates(offset=0):
     return r.get(telegram_url + f"/getUpdates?offset={offset}").json()
@@ -60,7 +64,7 @@ async def a_get_price(url, session):
             Current session of the aiohttp.ClientSession() call.
 
     Returns:
-        String in format: <Coin name> <Coin price in USD>$
+        String in format: <Coin name> <Coin price in USD>$.
     """
     try:
         async with session.get(url) as response:
@@ -71,7 +75,9 @@ async def a_get_price(url, session):
                 " " + str(price) + "$\n"
         return price
     except Exception as e:
+        logging.warning(f"Unable to get url {url} due to {e.__class__}.")
         print(f"Unable to get url {url} due to {e.__class__}.")
+        return None
 
 
 async def a_get_prices(urls):
@@ -87,9 +93,6 @@ async def a_get_prices(urls):
     async with aiohttp.ClientSession() as session:
         prices = await asyncio.gather(*[a_get_price(url, session) for url in urls])
     return prices
-
-logging.basicConfig(encoding='utf-8',
-                    level=logging.DEBUG, filename='binance_bot.log', format='%(asctime)s %(levelname)s:%(message)s', datefmt='%F %H:%M:%S')
 
 
 def main():
